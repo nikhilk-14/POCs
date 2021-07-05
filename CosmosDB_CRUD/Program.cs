@@ -19,8 +19,32 @@ namespace CosmosDB_CRUD
         static async Task Main(string[] args)
         {
             var p = new Program();
-            p.SetCosmosConnecttion();
-            await p.ProcessJsonFiles();
+
+            var connectionString = ConfigurationManager.AppSettings.Get("ConnectionString");
+            var databaseName = ConfigurationManager.AppSettings.Get("DatabaseName");
+            var containerName = ConfigurationManager.AppSettings.Get("ContainerName");
+
+            if (args.Length == 6)
+            {
+                var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                await Task.Run(() =>
+                {
+                    foreach (var arg in args)
+                    {
+                        var temp = arg.Split("--");
+                        dict.Add(temp[0], temp[1]);
+                    }
+                });
+
+                connectionString = dict["ConnectionName"];
+                databaseName = dict["DatabaseName"];
+                containerName = dict["ContainerName"];
+
+                Console.WriteLine($"{connectionString}\n{databaseName}\n{containerName}");
+            }
+
+            //p.SetCosmosConnecttion(connectionString, databaseName, containerName);
+            //await p.ProcessJsonFiles();
             Console.WriteLine("Press Any Key To Exit...");
             Console.ReadKey();
         }
@@ -63,11 +87,11 @@ namespace CosmosDB_CRUD
             await this.container.DeleteItemAsync<T>(id, new PartitionKey(partitionKeyValue));
         }
 
-        private void SetCosmosConnecttion()
+        private void SetCosmosConnecttion(string connectionString, string databaseName, string containerName)
         {
-            this.cosmosClient = new CosmosClient(ConfigurationManager.AppSettings.Get("ConnectionString"));
-            this.database = this.cosmosClient.GetDatabase(ConfigurationManager.AppSettings.Get("DatabaseName"));
-            this.container = this.database.GetContainer(ConfigurationManager.AppSettings.Get("ContainerName"));
+            cosmosClient = new CosmosClient(connectionString);
+            database = this.cosmosClient.GetDatabase(databaseName);
+            container = this.database.GetContainer(containerName);
         }
 
         private async Task ProcessJsonFiles()
