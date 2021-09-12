@@ -1,0 +1,10 @@
+<h1>API Data Test</h1>
+
+<div>
+    <a routerLink='/'>Go To Home</a>
+</div>
+
+<div class="form-group">
+    <button type="button" (click)="getAPIData()">Refresh API Data</button>
+</div>
+<pre>{{apiData | json}}</pre>
