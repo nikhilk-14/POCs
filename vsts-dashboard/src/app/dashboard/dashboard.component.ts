@@ -49,7 +49,7 @@ export class DashboardComponent implements OnInit {
     this.showLoader = true;
     this.selectUserWorkItems = {};
     let inputJson = {
-      'query': `Select [System.ID] From WorkItems Where [System.WorkItemType] In ("Task","Bug") AND [State] <> "Removed" AND [System.IterationPath] Under "Category Management System\\Sprint 113" AND [System.AssignedTo] == "${user.name}"`
+      'query': `Select [System.ID] From WorkItems Where [System.WorkItemType] In ("Task","Bug") AND [State] <> "Removed" AND [System.IterationPath] Under @CurrentIteration('[Category Management System]\\Category Management System Team') AND [System.AssignedTo] == "${user.name}"`
     };
     let vsts_url = 'https://dev.azure.com/seyc/_apis/wit/wiql?api-version=6.0';
     let workItemsUrl = 'https://dev.azure.com/seyc/_apis/wit/workItems';

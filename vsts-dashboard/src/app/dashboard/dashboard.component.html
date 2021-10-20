@@ -21,7 +21,7 @@
                         <th>State</th>
                     </tr>
                     <tr *ngFor="let item of selectUserWorkItems">
-                        <td>{{item['System.Id']}}</td>
+                        <td><a [attr.href]="'https://seyc.visualstudio.com/Category%20Management%20System/_workitems/edit/'+item['System.Id']" target="_blank">{{item['System.Id']}}</a></td>
                         <td>{{item['System.Title']}}</td>
                         <td>{{item['System.WorkItemType']}}</td>
                         <td>{{item['System.State']}}</td>
@@ -41,7 +41,7 @@
         <div *ngIf='selectedUser.name'>
             <div>
                 <h1>Supporing Information...!!</h1>
-                <b>There is no relation between this section and team member</b>
+                <b>Note: There is no relation between this section and team members</b>
             </div>
             <div>
                 <img [src]="selectedUser.prog_url" />
