@@ -1,7 +1,7 @@
 <div class="row">
     <div>
         <div class='users'>
-            <h1>Team Members</h1>
+            <h1>Who Are Team Members</h1>
             <ul>
                 <li *ngFor="let user of users" (click)='user.isDone = !user.isDone'>
                     <span [class.done]="user.isDone">{{user.name}}</span>
@@ -11,7 +11,8 @@
         </div>
         <div class="workitems">
             <div *ngIf='selectedUser.name'>
-                <h2>{{selectedUser.name}}</h2>
+                <h3>What are tasks and Where they are focusing</h3>
+                <h4>{{selectedUser.name}}</h4>
                 <table *ngIf='selectUserWorkItems && selectUserWorkItems.length'>
                     <tr>
                         <th>ID</th>
@@ -26,7 +27,7 @@
                         <td>{{item['System.State']}}</td>
                     </tr>
                 </table>
-                <div *ngIf='!(selectUserWorkItems && selectUserWorkItems.length)'>
+                <div *ngIf='!showLoader && !(selectUserWorkItems && selectUserWorkItems.length)'>
                     <b>No Data Found</b>
                 </div>
                 <div *ngIf='showLoader' class="loader"></div>
@@ -39,7 +40,7 @@
     <div #noTeamMember class='coding-fun'>
         <div *ngIf='selectedUser.name'>
             <div>
-                <h1>Something funny...!!</h1>
+                <h1>Supporing Information...!!</h1>
                 <b>There is no relation between this section and team member</b>
             </div>
             <div>
@@ -51,3 +52,18 @@
         </div>
     </div>
 </div>
+<ng-template #modalData let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title" id="modal-basic-title">All are done...!!</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p>Thanks for joining standup and providing updates.</p>
+      <p>I would like to nominate <strong>{{nomination.name}}</strong> for tomorrow's standup.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-danger" (click)="modal.close('Save click')">Close</button>
+    </div>
+  </ng-template>

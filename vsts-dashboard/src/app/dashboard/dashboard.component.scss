@@ -10,6 +10,7 @@ table {
         border: 1px solid black;
         padding: 5px;
         text-align: left;
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 }
 
@@ -27,6 +28,10 @@ table {
     padding: 10px;
     border: 1px solid black;
     background-color: aliceblue;
+
+    h4 {
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif !important;
+    }
 }
 
 .coding-fun {
@@ -35,16 +40,17 @@ table {
     padding: 10px;
     border: 1px solid black;
     background-color: azure;
+    height: 100% !important;
 }
 
 .row {
     display: flex;                 /* establish flex container */
     height: auto;                 /* height from original code */
-    width: auto;                 /* width from original code */
+    width: 100%;                 /* width from original code */
 }
 
 .row > div:first-child {
-    flex: 0 0 50%;                 /* width from original code */
+    flex: 1 0 50%;                 /* width from original code */
     display: flex;
     flex-direction: column;        /* stack first div children vertically */
 }
@@ -54,7 +60,7 @@ table {
 }
 
 .row > div:last-child {
-  flex: 0 0 40%;
+  flex: 0 0 45%;
 }
 
 .loader{
@@ -79,6 +85,7 @@ ul {
     li {
         cursor: pointer;
         padding: 2px;
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 }
 
@@ -94,13 +101,23 @@ button {
     border: 1px solid black;
     border-radius: 5px;
     cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-h1, h2 {
+h1, h2, h3, h4 {
     text-align: center;
+    font-family: cursive;
+}
+
+b {
+    font-family: monospace;
 }
 
 .users, .workitems, .coding-fun {
     box-shadow: 5px 10px gray;
 }
 
+.close {
+    width: auto !important;
+    padding: 0 5px !important;
+}

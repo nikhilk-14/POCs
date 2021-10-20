@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { HttpClient, HttpHeaders } from "@angular/common/http";
+import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-dashboard',
@@ -7,17 +8,21 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
+  @ViewChild('modalData') modalData: any;
 
   users: any = [];
   selectedUser: any = {};
   selectUserWorkItems: any = {};
   showLoader: boolean = false;
+  closeModal: string = '';
+  nomination: any = {};
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient, private modalService: NgbModal) { }
 
   ngOnInit(): void {
     this.httpClient.get('assets/users.json').subscribe(data => {
       this.users = data;
+      this.users = this.users.sort((item1: any, item2: any) => { return item1.name < item2.name ? -1 : 1; })
     });
   }
 
@@ -31,8 +36,8 @@ export class DashboardComponent implements OnInit {
         this.getUserWorkItemIds(this.selectedUser);
       }
     } else {
-      let nomination = this.getRandomItem(this.users);
-      alert(`All are done, thanks for joining standup and providing updates, I would like to nominate ${nomination.name} for tomorrow's standup.`);
+      this.nomination = this.getRandomItem(this.users);
+      this.triggerModal(this.modalData);
     }
   }
 
@@ -42,6 +47,7 @@ export class DashboardComponent implements OnInit {
 
   getUserWorkItemIds(user: any) {
     this.showLoader = true;
+    this.selectUserWorkItems = {};
     let inputJson = {
       'query': `Select [System.ID] From WorkItems Where [System.WorkItemType] In ("Task","Bug") AND [State] <> "Removed" AND [System.IterationPath] Under "Category Management System\\Sprint 113" AND [System.AssignedTo] == "${user.name}"`
     };
@@ -66,10 +72,27 @@ export class DashboardComponent implements OnInit {
         });
       } else {
         this.showLoader = false;
-        this.selectUserWorkItems = {};
       }
     }, (err) => {
     }, () => {
     });
+  }
+
+  triggerModal(content: any) {
+    this.modalService.open(content, {ariaLabelledBy: 'modal-basic-title'}).result.then((res) => {
+      this.closeModal = `Closed with: ${res}`;
+    }, (res) => {
+      this.closeModal = `Dismissed ${this.getDismissReason(res)}`;
+    });
+  }
+  
+  private getDismissReason(reason: any): string {
+    if (reason === ModalDismissReasons.ESC) {
+      return 'by pressing ESC';
+    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
+      return 'by clicking on a backdrop';
+    } else {
+      return  `with: ${reason}`;
+    }
   }
 }
