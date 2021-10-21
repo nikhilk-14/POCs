@@ -122,3 +122,24 @@ b {
     width: auto !important;
     padding: 0 5px !important;
 }
+
+.tokenValidation {
+    width: 600px;
+    margin: 10px auto;
+
+    .tokenInput, .tokenSubmit {
+        display: block;
+        margin: 10px;
+    }
+
+    .tokenInput {
+        width: 50%;
+    }
+
+    button:disabled,
+    button[disabled]{
+        border: 1px solid #999999;
+        background-color: #cccccc;
+        color: #666666;
+    }
+}

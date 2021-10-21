@@ -10,12 +10,23 @@ import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 export class DashboardComponent implements OnInit {
   @ViewChild('modalData') modalData: any;
 
+  @ViewChild('modalMessage') modalMessage: any;
+  modalMessageHeader: string = '';
+  modalMessageBody: string = '';
+
   users: any = [];
   selectedUser: any = {};
   selectUserWorkItems: any = {};
   showLoader: boolean = false;
   closeModal: string = '';
   nomination: any = {};
+
+  isValidToken: boolean = false;
+  vstsApiUrl: string = 'https://dev.azure.com';
+  orgName: string = 'seyc';
+  projectName: string = '[Category Management System]\\Category Management System Team';
+
+  pat: any = '';
 
   constructor(private httpClient: HttpClient, private modalService: NgbModal) { }
 
@@ -24,6 +35,31 @@ export class DashboardComponent implements OnInit {
       this.users = data;
       this.users = this.users.sort((item1: any, item2: any) => { return item1.name < item2.name ? -1 : 1; })
     });
+  }
+
+  submitToken() {
+    if (this.pat) {
+      this.showLoader = true;
+      let options = this.getHeaders();
+      let vstsProjectsUrl = `${this.vstsApiUrl}/${this.orgName}/_apis/projects`;
+      this.httpClient.get(vstsProjectsUrl, options)
+      .subscribe((data: any) => {
+          this.isValidToken = true;
+        }, (err: any) => {
+          this.modalMessageHeader = 'Error';
+          this.modalMessageBody = 'Invalid Personal Access Token';
+          this.triggerModal(this.modalMessage);
+          this.isValidToken = false;
+        }, () => {
+          this.showLoader = false;
+      }).add(() => {
+        this.showLoader = false;
+      });
+    } else {
+      this.modalMessageHeader = 'Warning';
+      this.modalMessageBody = 'Please provide Personal Access Token';
+      this.triggerModal(this.modalMessage);
+    }
   }
 
   getNextUser() {
@@ -45,35 +81,57 @@ export class DashboardComponent implements OnInit {
     return items[Math.floor(Math.random() * items.length)];
   }
 
-  getUserWorkItemIds(user: any) {
-    this.showLoader = true;
-    this.selectUserWorkItems = {};
-    let inputJson = {
-      'query': `Select [System.ID] From WorkItems Where [System.WorkItemType] In ("Task","Bug") AND [State] <> "Removed" AND [System.IterationPath] Under @CurrentIteration('[Category Management System]\\Category Management System Team') AND [System.AssignedTo] == "${user.name}"`
-    };
-    let vsts_url = 'https://dev.azure.com/seyc/_apis/wit/wiql?api-version=6.0';
-    let workItemsUrl = 'https://dev.azure.com/seyc/_apis/wit/workItems';
+  getWorkItemsByIds(workItemIds: string, options: any) {
+    let workItemsApiUrl = `${this.vstsApiUrl}/${this.orgName}/_apis/wit/workItems`;
+    let workItemsUrl = `${workItemsApiUrl}?ids=${workItemIds}&fields=System.ID,System.Title,System.WorkItemType,System.State&api-version=6.0`;
+    
+    this.httpClient.get(workItemsUrl, options).subscribe((workItems: any) => {
+      let items = workItems.value.map((itm: any) => itm.fields);
+      this.selectUserWorkItems = items;
+    }, (err) => {
+      this.showLoader = false;
+      this.modalMessageHeader = 'Error';
+      this.modalMessageBody = 'Error in getting data';
+      this.triggerModal(this.modalMessage);
+    }, () => {
+        this.showLoader = false;
+    });
+  }
+
+  getHeaders(): any {
+    let basicToken = btoa(`:${this.pat}`);
     let headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Basic OmZ4dDZoeWRoeWN4bGxoNjdlNWVtejJka2RjdzNkNjQzNTM1dWlrZmlkcmY0dXNzbWlmb3E=`,
+      'Authorization': `Basic ${basicToken}`,
       'X-TFS-FedAuthRedirect': 'Suppress' 
     });
     let options = { headers: headers };
-    this.httpClient.post(vsts_url, inputJson, options).subscribe((data: any) => {
+    return options;
+  }
+
+  getUserWorkItemIds(user: any) {
+    this.showLoader = true;
+    this.selectUserWorkItems = {};
+
+    let queryDataUrl = `${this.vstsApiUrl}/${this.orgName}/_apis/wit/wiql?api-version=6.0`;
+    let inputJson = {
+      'query': `Select [System.ID] From WorkItems Where [System.WorkItemType] In ("Task","Bug") AND [State] <> "Removed" AND [System.IterationPath] Under @CurrentIteration('${this.projectName}') AND [System.AssignedTo] == "${user.name}"`
+    };
+
+    let options = this.getHeaders();
+
+    this.httpClient.post(queryDataUrl, inputJson, options).subscribe((data: any) => {
       if (data && data.workItems && data.workItems.length) {
         let workItemIds = data.workItems.map((itm: any) => itm['id']).join(',');
-        let url = `${workItemsUrl}?ids=${workItemIds}&fields=System.ID,System.Title,System.WorkItemType,System.State&api-version=6.0`;
-        this.httpClient.get(url, options).subscribe((workItems: any) => {
-          let items = workItems.value.map((itm: any) => itm.fields);
-          this.selectUserWorkItems = items;
-        }, (err) => {
-        }, () => {
-          this.showLoader = false;
-        });
+        this.getWorkItemsByIds(workItemIds, options);
       } else {
         this.showLoader = false;
       }
     }, (err) => {
+      this.showLoader = false;
+      this.modalMessageHeader = 'Error';
+      this.modalMessageBody = 'Error in getting data';
+      this.triggerModal(this.modalMessage);
     }, () => {
     });
   }
