@@ -154,5 +154,11 @@
     "name": "Deepti Agarwal",
     "isDone": false,
     "prog_url": "assets/img/26.png"
+  },
+  {
+    "id": 27,
+    "name": "Paresh Kolekar",
+    "isDone": false,
+    "prog_url": "assets/img/27.png"
   }
 ]
